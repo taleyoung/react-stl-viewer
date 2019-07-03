@@ -10,7 +10,7 @@ class STLViewer extends Component {
     width: PropTypes.number,
     height: PropTypes.number,
     backgroundColor: PropTypes.string,
-    modelColor: PropTypes.string,
+    modelColor: PropTypes.array,
     rotate: PropTypes.bool,
     orbitControls: PropTypes.bool,
     cameraX: PropTypes.number,
@@ -19,15 +19,14 @@ class STLViewer extends Component {
     lights: PropTypes.array,
     lightColor: PropTypes.string,
     rotationSpeeds: PropTypes.arrayOf(PropTypes.number),
-    model: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.instanceOf(ArrayBuffer)
-    ]).isRequired
+    model: PropTypes.arrayOf(
+      PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(ArrayBuffer)])
+    ).isRequired
   };
 
   static defaultProps = {
     backgroundColor: '#EAEAEA',
-    modelColor: '#B92C2C',
+    modelColor: [],
     height: 400,
     width: 400,
     rotate: true,
@@ -45,7 +44,13 @@ class STLViewer extends Component {
     this.paint = new Paint();
     this.paint.init(this);
   }
-
+  //新增
+  // componentWillReceiveProps(nextProps) {
+  //   if (nextProps) {
+  //     console.log('进入新props', nextProps);
+  //     this.paint.init(this);
+  //   }
+  // }
   shouldComponentUpdate(nextProps, nextState) {
     return JSON.stringify(nextProps) !== JSON.stringify(this.props);
   }
@@ -79,7 +84,7 @@ class STLViewer extends Component {
             alignItems: 'center'
           }}
         >
-          <ScaleLoader color={modelColor} size="16px" />
+          <ScaleLoader color="red" size="16px" />
         </div>
       </div>
     );

@@ -6,7 +6,6 @@ const DIRECTIONAL_LIGHT = 'directionalLight';
 
 class Paint {
   constructor() {
-    this.loader = new THREE.STLLoader();
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({
       antialias: true
@@ -34,7 +33,7 @@ class Paint {
       this.scene.remove(this.mesh);
       this.mesh.geometry.dispose();
       this.mesh.material.dispose();
-      this.scene.remove(this.grid);
+      // this.scene.remove(this.grid);
     }
     const directionalLightObj = this.scene.getObjectByName(DIRECTIONAL_LIGHT);
     if (directionalLightObj) {
@@ -64,11 +63,12 @@ class Paint {
   }
 
   addLight(lights, index = 0) {
-    const directionalLight = new THREE.DirectionalLight(this.lightColor);
-    directionalLight.position.set(...lights);
-    directionalLight.name = DIRECTIONAL_LIGHT + index;
-    directionalLight.position.normalize();
-    this.scene.add(directionalLight);
+    // const directionalLight = new THREE.DirectionalLight(this.lightColor);
+    // directionalLight.position.set(...lights);
+    // directionalLight.name = DIRECTIONAL_LIGHT + index;
+    // directionalLight.position.normalize();
+    // this.scene.add(directionalLight);
+    this.scene.add(new THREE.AmbientLight(0x444444));
   }
 
   loadSTLFromUrl(url, reqId) {
@@ -93,55 +93,62 @@ class Paint {
 
   addSTLToScene(reqId) {
     let loadPromise;
-    if (typeof this.model === 'string') {
-      loadPromise = this.loadSTLFromUrl(this.model, reqId);
-    } else if (this.model instanceof ArrayBuffer) {
-      loadPromise = this.loadFromFile(this.model);
-    } else {
-      return Promise.resolve(null);
-    }
-    return loadPromise.then(geometry => {
-      // Calculate mesh noramls for MeshLambertMaterial.
-      geometry.computeFaceNormals();
-      geometry.computeVertexNormals();
+    let group = new THREE.Object3D();
+    this.model.forEach((eachModal, key) => {
+      this.loader = new THREE.STLLoader();
+      if (typeof eachModal === 'string') {
+        loadPromise = this.loadSTLFromUrl(eachModal, reqId);
+      } else if (eachModal instanceof ArrayBuffer) {
+        loadPromise = this.loadFromFile(eachModal);
+      } else {
+        return Promise.resolve(null);
+      }
+      loadPromise.then(geometry => {
+        // Calculate mesh noramls for MeshLambertMaterial.
 
-      // Center the object
-      geometry.center();
+        // geometry.computeFaceNormals();
+        // geometry.computeVertexNormals();
 
-      let material = new THREE.MeshLambertMaterial({
-        overdraw: true,
-        color: this.modelColor
-      });
+        // Center the object
+        geometry.center();
 
-      if (geometry.hasColors) {
-        material = new THREE.MeshPhongMaterial({
-          opacity: geometry.alpha,
-          vertexColors: THREE.VertexColors
+        let material = new THREE.MeshLambertMaterial({
+          overdraw: true,
+          color: this.modelColor[key % 12]
         });
-      }
+        console.log('this.modelColor[key % 12]', this.modelColor[key % 12]);
+        if (geometry.hasColors) {
+          material = new THREE.MeshPhongMaterial({
+            opacity: geometry.alpha,
+            vertexColors: THREE.VertexColors
+          });
+        }
 
-      this.mesh = new THREE.Mesh(geometry, material);
-      // Set the object's dimensions
-      geometry.computeBoundingBox();
-      this.xDims = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-      this.yDims = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-      this.zDims = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
+        this.mesh = new THREE.Mesh(geometry, material);
+        // Set the object's dimensions
+        geometry.computeBoundingBox();
+        this.xDims = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
+        this.yDims = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
+        this.zDims = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
 
-      if (this.rotate) {
-        this.mesh.rotation.x = this.rotationSpeeds[0];
-        this.mesh.rotation.y = this.rotationSpeeds[1];
-        this.mesh.rotation.z = this.rotationSpeeds[2];
-      }
-
-      this.scene.add(this.mesh);
-
-      this.addCamera();
-      this.addInteractionControls();
-      this.addToReactComponent();
-
-      // Start the animation
-      this.animate();
+        if (this.rotate) {
+          this.mesh.rotation.x = this.rotationSpeeds[0];
+          this.mesh.rotation.y = this.rotationSpeeds[1];
+          this.mesh.rotation.z = this.rotationSpeeds[2];
+        }
+        //下面两行是新加的
+        this.mesh.position.set(0, 0, 0);
+        this.mesh.rotation.set(0, -Math.PI / 2, 0);
+        group.add(this.mesh);
+      });
     });
+    this.scene.add(group);
+    this.addCamera();
+    this.addInteractionControls();
+    this.addToReactComponent();
+
+    // Start the animation
+    this.animate();
   }
 
   addCamera() {
@@ -161,9 +168,7 @@ class Paint {
 
     this.scene.add(this.camera);
 
-    this.camera.lookAt(this.mesh);
-
-    this.renderer.set;
+    // this.renderer.set;
     this.renderer.setSize(this.width, this.height);
     this.renderer.setClearColor(this.backgroundColor, 1);
   }

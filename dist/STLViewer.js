@@ -39,6 +39,14 @@ var STLViewer = function (_Component) {
       this.paint = new _Paint2.default();
       this.paint.init(this);
     }
+    //新增
+    // componentWillReceiveProps(nextProps) {
+    //   if (nextProps) {
+    //     console.log('进入新props', nextProps);
+    //     this.paint.init(this);
+    //   }
+    // }
+
   }, {
     key: 'shouldComponentUpdate',
     value: function shouldComponentUpdate(nextProps, nextState) {
@@ -84,7 +92,7 @@ var STLViewer = function (_Component) {
               alignItems: 'center'
             }
           },
-          _react2.default.createElement(_halogenium.ScaleLoader, { color: modelColor, size: '16px' })
+          _react2.default.createElement(_halogenium.ScaleLoader, { color: 'red', size: '16px' })
         )
       );
     }
@@ -99,7 +107,7 @@ STLViewer.propTypes = {
   width: _propTypes2.default.number,
   height: _propTypes2.default.number,
   backgroundColor: _propTypes2.default.string,
-  modelColor: _propTypes2.default.string,
+  modelColor: _propTypes2.default.array,
   rotate: _propTypes2.default.bool,
   orbitControls: _propTypes2.default.bool,
   cameraX: _propTypes2.default.number,
@@ -108,11 +116,11 @@ STLViewer.propTypes = {
   lights: _propTypes2.default.array,
   lightColor: _propTypes2.default.string,
   rotationSpeeds: _propTypes2.default.arrayOf(_propTypes2.default.number),
-  model: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.instanceOf(ArrayBuffer)]).isRequired
+  model: _propTypes2.default.arrayOf(_propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.instanceOf(ArrayBuffer)])).isRequired
 };
 STLViewer.defaultProps = {
   backgroundColor: '#EAEAEA',
-  modelColor: '#B92C2C',
+  modelColor: [],
   height: 400,
   width: 400,
   rotate: true,
