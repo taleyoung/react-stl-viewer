@@ -39,14 +39,6 @@ var STLViewer = function (_Component) {
       this.paint = new _Paint2.default();
       this.paint.init(this);
     }
-    //新增
-    // componentWillReceiveProps(nextProps) {
-    //   if (nextProps) {
-    //     console.log('进入新props', nextProps);
-    //     this.paint.init(this);
-    //   }
-    // }
-
   }, {
     key: 'shouldComponentUpdate',
     value: function shouldComponentUpdate(nextProps, nextState) {

@@ -63,11 +63,6 @@ class Paint {
   }
 
   addLight(lights, index = 0) {
-    // const directionalLight = new THREE.DirectionalLight(this.lightColor);
-    // directionalLight.position.set(...lights);
-    // directionalLight.name = DIRECTIONAL_LIGHT + index;
-    // directionalLight.position.normalize();
-    // this.scene.add(directionalLight);
     this.scene.add(new THREE.AmbientLight(0x444444));
   }
 
@@ -136,7 +131,6 @@ class Paint {
           this.mesh.rotation.y = this.rotationSpeeds[1];
           this.mesh.rotation.z = this.rotationSpeeds[2];
         }
-        //下面两行是新加的
         this.mesh.position.set(0, 0, 0);
         this.mesh.rotation.set(0, -Math.PI / 2, 0);
         group.add(this.mesh);

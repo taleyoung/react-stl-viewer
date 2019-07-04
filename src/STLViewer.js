@@ -44,13 +44,6 @@ class STLViewer extends Component {
     this.paint = new Paint();
     this.paint.init(this);
   }
-  //新增
-  // componentWillReceiveProps(nextProps) {
-  //   if (nextProps) {
-  //     console.log('进入新props', nextProps);
-  //     this.paint.init(this);
-  //   }
-  // }
   shouldComponentUpdate(nextProps, nextState) {
     return JSON.stringify(nextProps) !== JSON.stringify(this.props);
   }

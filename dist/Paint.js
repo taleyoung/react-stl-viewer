@@ -36,7 +36,6 @@ var Paint = function () {
   _createClass(Paint, [{
     key: 'init',
     value: function init(context) {
-      console.log('context', context);
       this.component = context;
       this.width = context.props.width;
       this.height = context.props.height;
@@ -88,11 +87,6 @@ var Paint = function () {
     value: function addLight(lights) {
       var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
-      // const directionalLight = new THREE.DirectionalLight(this.lightColor);
-      // directionalLight.position.set(...lights);
-      // directionalLight.name = DIRECTIONAL_LIGHT + index;
-      // directionalLight.position.normalize();
-      // this.scene.add(directionalLight);
       this.scene.add(new _Three2.default.AmbientLight(0x444444));
     }
   }, {
@@ -170,7 +164,6 @@ var Paint = function () {
             _this3.mesh.rotation.y = _this3.rotationSpeeds[1];
             _this3.mesh.rotation.z = _this3.rotationSpeeds[2];
           }
-          //下面两行是新加的
           _this3.mesh.position.set(0, 0, 0);
           _this3.mesh.rotation.set(0, -Math.PI / 2, 0);
           group.add(_this3.mesh);
