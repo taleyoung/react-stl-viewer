@@ -16,8 +16,6 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var OrbitControls = require('three-orbit-controls')(_Three2.default);
@@ -28,7 +26,6 @@ var Paint = function () {
   function Paint() {
     _classCallCheck(this, Paint);
 
-    this.loader = new _Three2.default.STLLoader();
     this.scene = new _Three2.default.Scene();
     this.renderer = new _Three2.default.WebGLRenderer({
       antialias: true
@@ -58,7 +55,7 @@ var Paint = function () {
         this.scene.remove(this.mesh);
         this.mesh.geometry.dispose();
         this.mesh.material.dispose();
-        this.scene.remove(this.grid);
+        // this.scene.remove(this.grid);
       }
       var directionalLightObj = this.scene.getObjectByName(DIRECTIONAL_LIGHT);
       if (directionalLightObj) {
@@ -88,15 +85,9 @@ var Paint = function () {
   }, {
     key: 'addLight',
     value: function addLight(lights) {
-      var _directionalLight$pos;
-
       var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
-      var directionalLight = new _Three2.default.DirectionalLight(this.lightColor);
-      (_directionalLight$pos = directionalLight.position).set.apply(_directionalLight$pos, _toConsumableArray(lights));
-      directionalLight.name = DIRECTIONAL_LIGHT + index;
-      directionalLight.position.normalize();
-      this.scene.add(directionalLight);
+      this.scene.add(new _Three2.default.AmbientLight(0x444444));
     }
   }, {
     key: 'loadSTLFromUrl',
@@ -130,55 +121,61 @@ var Paint = function () {
       var _this3 = this;
 
       var loadPromise = void 0;
-      if (typeof this.model === 'string') {
-        loadPromise = this.loadSTLFromUrl(this.model, reqId);
-      } else if (this.model instanceof ArrayBuffer) {
-        loadPromise = this.loadFromFile(this.model);
-      } else {
-        return Promise.resolve(null);
-      }
-      return loadPromise.then(function (geometry) {
-        // Calculate mesh noramls for MeshLambertMaterial.
-        geometry.computeFaceNormals();
-        geometry.computeVertexNormals();
+      var group = new _Three2.default.Object3D();
+      this.model.forEach(function (eachModal, key) {
+        _this3.loader = new _Three2.default.STLLoader();
+        if (typeof eachModal === 'string') {
+          loadPromise = _this3.loadSTLFromUrl(eachModal, reqId);
+        } else if (eachModal instanceof ArrayBuffer) {
+          loadPromise = _this3.loadFromFile(eachModal);
+        } else {
+          return Promise.resolve(null);
+        }
+        loadPromise.then(function (geometry) {
+          // Calculate mesh noramls for MeshLambertMaterial.
 
-        // Center the object
-        geometry.center();
+          // geometry.computeFaceNormals();
+          // geometry.computeVertexNormals();
 
-        var material = new _Three2.default.MeshLambertMaterial({
-          overdraw: true,
-          color: _this3.modelColor
-        });
+          // Center the object
+          geometry.center();
 
-        if (geometry.hasColors) {
-          material = new _Three2.default.MeshPhongMaterial({
-            opacity: geometry.alpha,
-            vertexColors: _Three2.default.VertexColors
+          var material = new _Three2.default.MeshLambertMaterial({
+            overdraw: true,
+            color: _this3.modelColor[key % 12]
           });
-        }
+          console.log('this.modelColor[key % 12]', _this3.modelColor[key % 12]);
+          if (geometry.hasColors) {
+            material = new _Three2.default.MeshPhongMaterial({
+              opacity: geometry.alpha,
+              vertexColors: _Three2.default.VertexColors
+            });
+          }
 
-        _this3.mesh = new _Three2.default.Mesh(geometry, material);
-        // Set the object's dimensions
-        geometry.computeBoundingBox();
-        _this3.xDims = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-        _this3.yDims = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
-        _this3.zDims = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
+          _this3.mesh = new _Three2.default.Mesh(geometry, material);
+          // Set the object's dimensions
+          geometry.computeBoundingBox();
+          _this3.xDims = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
+          _this3.yDims = geometry.boundingBox.max.y - geometry.boundingBox.min.y;
+          _this3.zDims = geometry.boundingBox.max.z - geometry.boundingBox.min.z;
 
-        if (_this3.rotate) {
-          _this3.mesh.rotation.x = _this3.rotationSpeeds[0];
-          _this3.mesh.rotation.y = _this3.rotationSpeeds[1];
-          _this3.mesh.rotation.z = _this3.rotationSpeeds[2];
-        }
-
-        _this3.scene.add(_this3.mesh);
-
-        _this3.addCamera();
-        _this3.addInteractionControls();
-        _this3.addToReactComponent();
-
-        // Start the animation
-        _this3.animate();
+          if (_this3.rotate) {
+            _this3.mesh.rotation.x = _this3.rotationSpeeds[0];
+            _this3.mesh.rotation.y = _this3.rotationSpeeds[1];
+            _this3.mesh.rotation.z = _this3.rotationSpeeds[2];
+          }
+          _this3.mesh.position.set(0, 0, 0);
+          _this3.mesh.rotation.set(0, -Math.PI / 2, 0);
+          group.add(_this3.mesh);
+        });
       });
+      this.scene.add(group);
+      this.addCamera();
+      this.addInteractionControls();
+      this.addToReactComponent();
+
+      // Start the animation
+      this.animate();
     }
   }, {
     key: 'addCamera',
@@ -194,9 +191,7 @@ var Paint = function () {
 
       this.scene.add(this.camera);
 
-      this.camera.lookAt(this.mesh);
-
-      this.renderer.set;
+      // this.renderer.set;
       this.renderer.setSize(this.width, this.height);
       this.renderer.setClearColor(this.backgroundColor, 1);
     }
